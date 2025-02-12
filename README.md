@@ -80,6 +80,6 @@ URL: http://127.0.0.1:3000/abc123
 - 429 Too Many Requests: 請求頻率過高，請稍後再試。
 
 ### 5. 如何使用
-1. 發送 POST 請求到 YOUR_API_URL/short_url，並在request body中以json格式送出，包含原始網址 (original_url)。
-2. 根據response中的短網址 (short_url) 進行後續操作。
+1. 發送 POST 請求到 YOUR_API_URL/short_url，並在request body中以json格式送出，包含原始網址。
+2. 根據response中的短網址<得到的short_url>進行後續操作。
 3. 發送 GET 請求到 YOUR_API_URL/<得到的short_url>，以短網址作為URL路徑，將會被重定向到對應的原始網址。
