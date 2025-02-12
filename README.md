@@ -35,10 +35,10 @@ request body (JSON)：
 - original_url: 必須是有效的URL格式。
 
 代碼說明：
-- 201: 請求已成功，產生short url。
-- 400: 請求的格式或資料結構錯誤，或缺少必要的參數，或URL的格式錯誤。
-- 414: 請求的 URL 過長，超過最大長度 2048 字符。
-- 415: 請求帶入的body非json格式。
+- 201 Created: 請求已成功，產生short url。
+- 400 Bad Request: 請求的格式或資料結構錯誤，或缺少必要的參數，或URL的格式錯誤。
+- 414 URI Too Long: 請求的 URL 過長，超過最大長度 2048 字符。
+- 415 Unsupported Media Type: 請求帶入的body非json格式。
 - 429 Too Many Requests: 請求頻率過高，請稍後再試。
 
 
@@ -60,7 +60,7 @@ URL: http://127.0.0.1:3000/abc123
 }
 
 代碼說明：
-- 302: 請求已成功，並redirect。
+- 302 Found: 請求已成功，並redirect。
 - 404 Not Found: 短網址未在資料庫找到。
 - 410 Gone: 短網址已過期。
 - 429 Too Many Requests: 請求頻率過高，請稍後再試。
