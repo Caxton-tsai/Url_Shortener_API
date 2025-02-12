@@ -6,6 +6,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
 YOUR_API_URL = "http://127.0.0.1:3000/"
+REQUEST_RATE_LIMIT = "10 per minute"
 
 app = Flask(__name__)
 url_map = {} #存短網址與原始網址的對應關係
@@ -36,12 +37,12 @@ def create_short_url(original_url):
 
 #api 1：縮址
 @app.route("/short_url", methods=["POST"])
-@limiter.limit("1000 per minute") #速率限制，每個IP每分鐘最多n次
+@limiter.limit(REQUEST_RATE_LIMIT) #速率限制，每個IP每分鐘最多n次
 def create_short_url_api():
     try:
         data = request.get_json()
     except Exception as e:
-        return jsonify({"success": False, "reason": f"Invalid JSON format: {str(e)}"}), 400
+        return jsonify({"success": False, "reason": f"Invalid JSON format: {str(e)}"}), 415
 
     #檢查request資料
     original_url = data.get("original_url", "").strip()
@@ -72,7 +73,7 @@ def create_short_url_api():
 
 #api 2：重新導向
 @app.route("/<short_url>", methods=["GET"])
-@limiter.limit("1000 per minute")  #速率限制，每個IP每分鐘最多n次
+@limiter.limit(REQUEST_RATE_LIMIT)  #速率限制，每個IP每分鐘最多n次
 def redirect_to_original_api(short_url):
     short_url = f"{YOUR_API_URL}{short_url}"
     
