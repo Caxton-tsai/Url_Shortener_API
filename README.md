@@ -5,7 +5,7 @@
 ## API 功能
 ### 1. 縮網址 (POST YOUR_API_URL/short_url)
 
-將一個長網址提交給 API，並返回對應的短網址，依照自己的伺服器網址輸入YOUR_API_URL。  
+將一個長網址提交給 API，並返回對應的短網址，依照自己的伺服器網址修改程式碼 YOUR_API_URL變數。  
 變數範例： YOUR_API_URL = "http://127.0.0.1:3000/"
 
 請求範例：  
@@ -42,7 +42,7 @@ request body (JSON)：
 - 429 Too Many Requests: 請求頻率過高，請稍後再試。
 
 
-### 2. 重新導向 (GET YOUR_API_URL/"Returned_short_URL")
+### 2. 重新導向 (GET YOUR_API_URL/<得到的short_url>)
 通過短網址重定向到原始網址。
 
 請求範例：  
