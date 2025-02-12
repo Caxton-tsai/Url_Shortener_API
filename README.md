@@ -17,7 +17,7 @@ request body (JSON)：
   "original_url": "https://www.example.com"
 }
 
-回應範例：
+回應範例：  
 回應成功 (HTTP 201):  
 {
   "success": true,
@@ -25,7 +25,7 @@ request body (JSON)：
   "expiration_date": "2025-03-14T12:34:56"
 }
 
-回應錯誤 (HTTP 400):
+回應錯誤 (HTTP 400):  
 {
   "success": false,
   "reason": "Invalid URL"
@@ -47,7 +47,7 @@ request body (JSON)：
 URL: http://127.0.0.1:3000/abc123  
 方法: GET
 
-回應範例：
+回應範例：  
 回應成功 (HTTP 302):  
 用戶將被重定向到原始網址。
 
@@ -71,7 +71,7 @@ URL: http://127.0.0.1:3000/abc123
 - 415 Unsupported Media Type: 請求的資料格式不受支持。
 - 429 Too Many Requests: 請求頻率過高，請稍後再試。
 
-如何使用
-1. 發送 POST 請求到 /short_url，並在請求主體中包含原始網址 (original_url)。
-2. 根據回應中的短網址 (short_url) 進行後續操作。
-3. 發送 GET 請求到 /:short_url，以短網址作為 URL 路徑，將會被重定向到對應的原始網址。
+### 5. 如何使用
+1. 發送 POST 請求到 YOUR_API_URL/short_url，並在request body中以json格式送出，包含原始網址 (original_url)。
+2. 根據response中的短網址 (short_url) 進行後續操作。
+3. 發送 GET 請求到 YOUR_API_URL/<得到的short_url>，以短網址作為URL路徑，將會被重定向到對應的原始網址。
