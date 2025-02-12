@@ -2,10 +2,10 @@
 
 這是一個簡單的縮網址 API，允許用戶將長網址轉換為短網址，並能夠在有效期內進行重定向。此API使用Flask框架開發，並採用限流來避免濫用。
 
-API 功能
+## API 功能
 ### 1. 縮網址 (POST YOUR_API_URL/short_url)
 
-將一個長網址提交給 API，並返回對應的短網址，依照自己的伺服器網址輸入YOUR_API_URL。
+將一個長網址提交給 API，並返回對應的短網址，依照自己的伺服器網址輸入YOUR_API_URL。  
 變數範例： YOUR_API_URL = "http://127.0.0.1:3000/"
 
 請求範例：  
@@ -18,7 +18,7 @@ request body (JSON)：
 }
 
 回應範例：
-回應成功 (HTTP 201):
+回應成功 (HTTP 201):  
 {
   "success": true,
   "short_url": "http://127.0.0.1:3000/abc123",
@@ -44,7 +44,7 @@ request body (JSON)：
 通過短網址重定向到原始網址。
 
 請求範例：  
-URL: http://127.0.0.1:3000/abc123
+URL: http://127.0.0.1:3000/abc123  
 方法: GET
 
 回應範例：
@@ -58,7 +58,7 @@ URL: http://127.0.0.1:3000/abc123
 }
 
 ### 3. 速率限制
-為了防止濫用，可以自訂速率限制。可以修改REQUEST_RATE_LIMIT變數。
+為了防止濫用，可以自訂速率限制。可以修改REQUEST_RATE_LIMIT變數。  
 變數範例： REQUEST_RATE_LIMIT = "10 per minute"
 
 ### 4. 錯誤處理
