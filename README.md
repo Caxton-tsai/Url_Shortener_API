@@ -82,3 +82,20 @@ URL: http://127.0.0.1:3000/abc123
 1. 發送 POST 請求到 YOUR_API_URL/short_url，並在request body中以json格式送出，包含原始網址。
 2. 根據response中的短網址<得到的short_url>進行後續操作。
 3. 發送 GET 請求到 YOUR_API_URL/<得到的short_url>，以短網址作為URL路徑，將會被重定向到對應的原始網址。
+
+## Docker 容器使用說明
+這個 Docker 映像檔包含了 URL 短網址 API，並且會在 3000 端口上監聽請求。您可以透過瀏覽器或任何 HTTP 客戶端（例如 Postman）來訪問這個 API。
+
+### 如何使用 Docker 容器
+1. **拉取 Docker 映像檔**：您可以從 Docker Hub 拉取預先建置好的映像檔：
+    ```bash
+    docker pull caxtontsai/my-flask-api
+    ```
+    
+2. **運行 Docker 容器**：拉取映像檔後，您可以在本地機器或伺服器上運行容器：
+    ```bash
+    docker run -p 3000:3000 caxtontsai/my-flask-api
+    ```
+
+
+
