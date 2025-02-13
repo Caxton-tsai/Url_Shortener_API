@@ -41,7 +41,6 @@ request body (JSON)：
 - 415 Unsupported Media Type: 請求帶入的body非json格式。
 - 429 Too Many Requests: 請求頻率過高，請稍後再試。
 
-
 ### 2. 重新導向 (GET YOUR_API_URL/<得到的short_url>)
 通過短網址重定向到原始網址。
 
