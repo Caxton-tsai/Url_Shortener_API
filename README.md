@@ -1,5 +1,107 @@
 # Url_Shortener_API
 
+This is a simple URL shortening API that allows users to convert long URLs into short URLs and redirect them within a valid period. The API is developed using the Flask framework and implements rate limiting to prevent abuse.
+
+## API Features
+### 1. Shorten URL (POST YOUR_API_URL/short_url)
+
+Submit a long URL to the API and it will return the corresponding short URL. Modify the `YOUR_API_URL` variable to match your server URL.  
+Example for the variable: `YOUR_API_URL = "http://127.0.0.1:3000/"`
+
+Request Example:  
+URL: http://127.0.0.1:3000/short_url  
+Method: POST
+
+Request body (JSON):
+{
+  "original_url": "https://www.example.com"
+}
+
+Response Example:  
+Successful response (HTTP 201):
+{
+  "success": true,
+  "short_url": "http://127.0.0.1:3000/abc123",
+  "expiration_date": "2025-03-14T12:34:56"
+}
+
+Error response (HTTP 400):
+{
+  "success": false,
+  "reason": "Invalid URL"
+}
+
+Parameter Explanation:
+- `original_url`: Must be a valid URL format.
+
+Status Code Explanation:
+- 201 Created: The request was successful, and the short URL was generated.
+- 400 Bad Request: The request format or data structure is incorrect, or a required parameter is missing, or the URL format is invalid.
+- 414 URI Too Long: The requested URL is too long and exceeds the maximum length of 2048 characters.
+- 415 Unsupported Media Type: The body of the request is not in JSON format.
+- 429 Too Many Requests: The request frequency is too high; please try again later.
+
+### 2. Redirect (GET YOUR_API_URL/<obtained_short_url>)
+
+Redirect from the short URL to the original URL.
+
+Request Example:  
+URL: http://127.0.0.1:3000/abc123  
+Method: GET
+
+Response Example:  
+Successful response (HTTP 302):  
+The user will be redirected to the original URL.
+
+Error response (HTTP 404):
+{
+  "success": false,
+  "reason": "Short URL is not found"
+}
+
+Status Code Explanation:
+- 302 Found: The request was successful, and a redirect occurred.
+- 404 Not Found: The short URL was not found in the database.
+- 410 Gone: The short URL has expired.
+- 429 Too Many Requests: The request frequency is too high; please try again later.
+
+### 3. Rate Limiting
+To prevent abuse, rate limits can be customized by modifying the `REQUEST_RATE_LIMIT` variable.  
+Example variable: `REQUEST_RATE_LIMIT = "10 per minute"`
+
+### 4. Error Handling
+Consolidated error codes:
+
+- 400 Bad Request: The request format or data structure is incorrect, or a required parameter is missing, or the URL format is invalid.
+- 404 Not Found: The short URL was not found in the database.
+- 410 Gone: The short URL has expired.
+- 414 URI Too Long: The requested URL is too long and exceeds the maximum length of 2048 characters.
+- 415 Unsupported Media Type: The request data format is not supported.
+- 429 Too Many Requests: The request frequency is too high; please try again later.
+
+### 5. How to Use
+1. Send a POST request to `YOUR_API_URL/short_url` with the original URL in the request body as JSON format.
+2. Use the short URL from the response `<obtained_short_url>` for subsequent actions.
+3. Send a GET request to `YOUR_API_URL/<obtained_short_url>`, where the short URL will redirect you to the original URL.
+
+## Docker Container Usage
+This Docker image contains the URL shortening API and listens on port 3000 for requests. You can access the API via a browser or any HTTP client (e.g., Postman).
+
+### How to Use the Docker Container
+1. **Pull the Docker image**: You can pull the pre-built image from Docker Hub:
+    ```bash
+    docker pull caxtontsai/my-flask-api
+    ```
+
+2. **Run the Docker container**: After pulling the image, you can run the container on your local machine or server:
+    ```bash
+    docker run -p 3000:3000 caxtontsai/my-flask-api
+    ```
+
+
+ 
+# Url_Shortener_API
+
 這是一個簡單的縮網址 API，允許用戶將長網址轉換為短網址，並能夠在有效期內進行重定向。此API使用Flask框架開發，並採用限流來避免濫用。
 
 ## API 功能
@@ -82,3 +184,20 @@ URL: http://127.0.0.1:3000/abc123
 1. 發送 POST 請求到 YOUR_API_URL/short_url，並在request body中以json格式送出，包含原始網址。
 2. 根據response中的短網址<得到的short_url>進行後續操作。
 3. 發送 GET 請求到 YOUR_API_URL/<得到的short_url>，以短網址作為URL路徑，將會被重定向到對應的原始網址。
+
+## Docker 容器使用說明
+這個 Docker 映像檔包含了 URL 短網址 API，並且會在 3000 端口上監聽請求。您可以透過瀏覽器或任何 HTTP 客戶端（例如 Postman）來訪問這個 API。
+
+### 如何使用 Docker 容器
+1. **拉取 Docker 映像檔**：您可以從 Docker Hub 拉取預先建置好的映像檔：
+    ```bash
+    docker pull caxtontsai/my-flask-api
+    ```
+    
+2. **運行 Docker 容器**：拉取映像檔後，您可以在本地機器或伺服器上運行容器：
+    ```bash
+    docker run -p 3000:3000 caxtontsai/my-flask-api
+    ```
+
+
+
