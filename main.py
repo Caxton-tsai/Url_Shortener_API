@@ -1,16 +1,26 @@
 from flask import Flask, request, jsonify, redirect
 from urllib.parse import urlparse
 import hashlib
-import datetime
+from datetime import datetime, timedelta
+import os
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from pymongo import MongoClient
+from dotenv import load_dotenv
+from apscheduler.schedulers.background import BackgroundScheduler
 
+
+
+load_dotenv()
+MONGO_CLIENT = os.getenv("MONGO_CLIENT")
+client = MongoClient(MONGO_CLIENT)
+database = client.senaonetworks #選db
 YOUR_API_URL = "http://127.0.0.1:3000/"
-REQUEST_RATE_LIMIT = "10 per minute"
+REQUEST_RATE_LIMIT = "1000 per minute"
 
 app = Flask(__name__)
-url_map = {} #存短網址與原始網址的對應關係
 limiter = Limiter(get_remote_address, app=app)
+
 
 #驗證URL格式
 def is_valid_url(url):
@@ -31,9 +41,10 @@ def create_short_url(original_url):
     combined_string = original_url + current_time
     hash_object = hashlib.sha256(combined_string.encode())
     short_hash = hash_object.hexdigest()[:6]
+    db_location = "/" + (str(datetime.date.today())[2:]).replace("-", "")
     expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=30) #設定過期時間為30天後
-    
-    return f"{YOUR_API_URL}{short_hash}", expiration_date
+
+    return f"{YOUR_API_URL}{short_hash}{db_location}", expiration_date
 
 #api 1：縮址
 @app.route("/short_url", methods=["POST"])
@@ -63,8 +74,13 @@ def create_short_url_api():
 
     #產生短網址並儲存
     short_url, expiration_date = create_short_url(original_url)
-    url_map[short_url] = {"original_url": original_url, "expiration_date": expiration_date}
-    print(url_map)
+    current_date = str(datetime.date.today())
+    database[current_date].insert_one({
+            "short_url" : short_url,
+            "original_url" : original_url,
+            "expiration_date" : expiration_date
+        })
+    
     return jsonify({
         "short_url": short_url,
         "expiration_date": expiration_date.isoformat(),
@@ -72,19 +88,24 @@ def create_short_url_api():
     }), 201
 
 #api 2：重新導向
-@app.route("/<short_url>", methods=["GET"])
+@app.route("/<short_url>/<db_location>", methods=["GET"])
 @limiter.limit(REQUEST_RATE_LIMIT)  #速率限制，每個IP每分鐘最多n次
-def redirect_to_original_api(short_url):
-    short_url = f"{YOUR_API_URL}{short_url}"
+def redirect_to_original_api(short_url,db_location):
+    short_url = f"{YOUR_API_URL}{short_url}/{db_location}"
+    db_location = "20" + db_location[:2] + "-" + db_location[2:4] + "-" + db_location[4:]
     
-    # 檢查短網址是否存在
-    if short_url not in url_map:
+    #檢查短網址是否存在
+    if db_location not in database.list_collection_names():
+        return jsonify({"success": False, "reason": "Short URL is not found"}), 404
+    
+    url_data = database[db_location].find_one({"short_url" : short_url})
+    if not url_data:
         return jsonify({"success": False, "reason": "Short URL is not found"}), 404
 
-    url_data = url_map[short_url]
     expiration_date_str = str(url_data["expiration_date"])
     expiration_date = datetime.datetime.fromisoformat(expiration_date_str)
 
+    #檢查是否過期
     if datetime.datetime.utcnow() > expiration_date:
         return jsonify({"success": False, "reason": "Short URL has expired"}), 410
 
@@ -95,5 +116,23 @@ def redirect_to_original_api(short_url):
 def ratelimit_exceeded(e):
     return jsonify({"success": False, "reason": "Too many requests, please try again later."}), 429
 
+#刪除過期short_url
+def delete_expired_short_urls():
+    today = datetime.today()
+    thirty_one_days_ago_date = str((today - timedelta(days=31)).date())
+    if thirty_one_days_ago_date in database.list_collection_names():
+        database.drop_collection(thirty_one_days_ago_date)
+        print(f"集合 {thirty_one_days_ago_date} 已刪除。")
+    else:
+        print(f"集合 {thirty_one_days_ago_date} 不存在，無需刪除。")
+
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(delete_expired_short_urls, "cron", hour=18, minute=36)
+    scheduler.start()
+    print("排程已啟動，每天00:00刪除過期短網址。")
+    
+
 if __name__ == "__main__":
+    scheduler =start_scheduler()
     app.run("0.0.0.0",port=3000)
