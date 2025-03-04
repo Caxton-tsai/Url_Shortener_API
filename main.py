@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, redirect
 from urllib.parse import urlparse
 import hashlib
 from datetime import datetime, timedelta
+
+
 import os
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -37,12 +39,12 @@ def is_valid_url(url):
 #產生短網址
 def create_short_url(original_url):
     """用時間加原本網址做hash，降低碰撞"""
-    current_time = datetime.datetime.utcnow().isoformat() #當前時間轉字串
+    current_time = datetime.utcnow().isoformat() #當前時間轉字串
     combined_string = original_url + current_time
     hash_object = hashlib.sha256(combined_string.encode())
     short_hash = hash_object.hexdigest()[:6]
-    db_location = "/" + (str(datetime.date.today())[2:]).replace("-", "")
-    expiration_date = datetime.datetime.utcnow() + datetime.timedelta(days=30) #設定過期時間為30天後
+    db_location = "/" + (str(datetime.today().date())[2:]).replace("-", "")
+    expiration_date = datetime.utcnow() + timedelta(days=30) #設定過期時間為30天後
 
     return f"{YOUR_API_URL}{short_hash}{db_location}", expiration_date
 
@@ -74,7 +76,7 @@ def create_short_url_api():
 
     #產生短網址並儲存
     short_url, expiration_date = create_short_url(original_url)
-    current_date = str(datetime.date.today())
+    current_date = str(datetime.today().date())
     database[current_date].insert_one({
             "short_url" : short_url,
             "original_url" : original_url,
@@ -103,10 +105,10 @@ def redirect_to_original_api(short_url,db_location):
         return jsonify({"success": False, "reason": "Short URL is not found"}), 404
 
     expiration_date_str = str(url_data["expiration_date"])
-    expiration_date = datetime.datetime.fromisoformat(expiration_date_str)
+    expiration_date = datetime.fromisoformat(expiration_date_str)
 
     #檢查是否過期
-    if datetime.datetime.utcnow() > expiration_date:
+    if datetime.utcnow() > expiration_date:
         return jsonify({"success": False, "reason": "Short URL has expired"}), 410
 
     return redirect(url_data["original_url"], code=302)
@@ -128,11 +130,11 @@ def delete_expired_short_urls():
 
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(delete_expired_short_urls, "cron", hour=18, minute=36)
+    scheduler.add_job(delete_expired_short_urls, "cron", hour=0, minute=0) #每天凌晨00:00執行
     scheduler.start()
     print("排程已啟動，每天00:00刪除過期短網址。")
     
 
 if __name__ == "__main__":
-    scheduler =start_scheduler()
+    scheduler = start_scheduler()
     app.run("0.0.0.0",port=3000)
